@@ -131,32 +131,11 @@ CATS.View = Classify({
             'change #skin': function () {
                 this.skin($("#skin").val());
             },
-            'change #el_per_page_input': function () {
-                var num = $('#el_per_page_input');
-
-                if (num.val() == 'All' || num.val() > this.elem_cnt) {
-                    num.val(this.elem_cnt);
-                }
-                this.view_state.set({ el_per_page: num.val() });
-            },
-            'click #el_per_page': function (e) {
-                $('#el_per_page_input').val(e.target.innerHTML);
-                $('#el_per_page_input').change();
+            'change #el_per_page': function () {
+                this.view_state.set({el_per_page: $("#el_per_page").val()});
             },
             'change #rnk_contest_minutes': function () {
-                var minutes = $("#rnk_contest_minutes");
-
-                if (minutes.val() > this.contest_duration) {
-                    minutes.val(this.contest_duration);
-                }
-                $("#contest_slider").slider('setValue', parseInt(minutes.val()));
-                this.update_rank_table({duration: {
-                    minutes : minutes.val(),
-                    type : $("#rnk_restriction_type .btn.active input").val()
-                }});
-            },
-            'change #rnk_restriction_type .btn': function () {
-                $("#rnk_contest_minutes").change();
+                this.update_rank_table({duration: {minutes : $("#rnk_contest_minutes").val(), type : $("#rnk_restriction_type").val() }});
             },
             'change #rnk_user': function () {
                 this.update_rank_table({user: $("#rnk_user").val()});
@@ -200,11 +179,11 @@ CATS.View = Classify({
                 series_params.parameter = $("#parameter").val();
                 series_params.aggregation = $("#aggregation").val();
                 series_params.group_by = $("#group_by").val();
-                series_params.statuses = $('#status').val()
-                series_params.problems = $('#problem').val();
+                series_params.statuses = $('input[name="statuses"]:checked').map(function() { return $(this).val(); }).get();
+                series_params.problems = $('input[name="problems"]:checked').map(function() { return $(this).val(); }).get();
                 series_params.user = $("#user").val();
                 series_params.affiliation = $("#affiliation").val();
-                series_params.color = $('#colorpicker').colorpicker('getValue');
+                series_params.color = $("input[name='color']:checked").val();
                 chart.add_new_series(series_params);
                 $("#catsscore_wrapper").html(this.page(this.skin(), "charts")(this.current_catsscore_wrapper_content_params));
                 this.update_url_settings({chart: chart.settings()});
@@ -222,28 +201,7 @@ CATS.View = Classify({
                 chart.delete_series($(event.currentTarget).data('series'));
                 $("#catsscore_wrapper").html(this.page(this.skin(), "charts")(this.current_catsscore_wrapper_content_params));
                 this.update_url_settings({chart: chart.settings()});
-            },
-            'click #btn_filters': function () {
-                if (!$('#collapse_filters').hasClass('collapsing')) {
-                    var btn = $('#btn_filters');
-
-                    btn.toggleClass('open');
-                    $('span', btn).toggleClass('glyphicon-triangle-bottom').toggleClass('glyphicon-triangle-right');
-                }
-            },
-            'click input': function (e) {
-                e.target.select();
             }
-        },
-
-        call_plugins: function () {
-            var params = this.current_catsscore_wrapper_content_params.models;
-
-            $('.selectpicker').selectpicker('render');
-            $('#problem, #status').selectpicker('selectAll');
-            $('#colorpicker').colorpicker({
-                colorSelectors: CATS.App.charts[params.chart].colors,
-            });
         },
 
         update_rank_table: function (filters) {
@@ -262,8 +220,7 @@ CATS.View = Classify({
                 var pagination = this.template("pagination")({
                     current_page: this.view_state.get('page'),
                     el_per_page: this.view_state.get('el_per_page'),
-                    maximum_page: pagination_params.max_page,
-                    elem_cnt: this.elem_cnt
+                    maximum_page: pagination_params.max_page
                 });
                 $("#catsscore_pagination_wrapper").html(pagination);
             }
@@ -272,7 +229,6 @@ CATS.View = Classify({
         },
 
         update_url_settings: function (settings) {
-            this.call_plugins();
             this.view_state.set({settings: settings}, {silent: true});
             window.history.pushState('', '', '#' + this.router.generate_url());
         },
@@ -361,7 +317,6 @@ CATS.View = Classify({
                     var table = CATS.App.result_tables[params.table];
                     return {
                         contest_duration: CATS.App.contests[table.contests[0]].compute_duration_minutes(),
-                        current_contest_duration: CATS.App.contests[table.contests[0]].compute_current_duration_minutes(),
                         filters: table.filters
                     };
                 case 'contests':
@@ -398,14 +353,11 @@ CATS.View = Classify({
             return page_name == 'table' || page_name == 'contests' || page_name == 'history';
         },
 
-        render: function (params) {
+        render: function(params){
             var pagination_params = this.define_pagination_params(params);
             var page_name = this.page_name();
             var source = this.source();
             var skin = this.skin();
-            var filters = this.get_settings_params(params);
-
-            filters.expanded = $('#collapse_filters').hasClass('in');
 
             if (page_name == "table")
                 page_name += "_" + CATS.App.result_tables[params.table].scoring;
@@ -413,9 +365,6 @@ CATS.View = Classify({
             this.detach_skin_stylesheet();
             if (this.with_css && this.available_skin_name(skin, page_name))
                 this.define_skin_stylesheet(skin);
-
-            this.elem_cnt = pagination_params.elem_cnt;
-            this.contest_duration = filters.contest_duration;
 
             var header = this.with_header ?
                 this.template("header_" + this.view_state.get("state"))({
@@ -430,8 +379,7 @@ CATS.View = Classify({
                 this.template("pagination")({
                     current_page: this.view_state.get('page'),
                     el_per_page: this.view_state.get('el_per_page'),
-                    maximum_page: pagination_params.max_page,
-                    elem_cnt: this.elem_cnt
+                    maximum_page: pagination_params.max_page
                 }) : "";
 
             this.current_catsscore_wrapper_content_params = {
@@ -448,9 +396,11 @@ CATS.View = Classify({
                 "<div id='catsscore_header'>" +
                 header +
                 "</div>" +
-                "<div id='catsscore_filters_wrapper'>" +
-                    this.page_settings(this.page_name())(filters) +
-                "</div>" +
+                "<details><summary><strong>Settings</strong></summary>" +
+                    "<div id='catsscore_filters_wrapper'>" +
+                    this.page_settings(this.page_name())(this.get_settings_params(params)) +
+                    "</div>" +
+                "</details>" +
                 "<div id='catsscore_pagination_wrapper'>" +
                 pagination +
                 "</div>" +
@@ -465,10 +415,7 @@ CATS.View = Classify({
             $("#source").val(this.source());
             $("#page_name").val(this.page_name());
             $("#skin").val(this.skin());
-            $("body").append('<div id="progress-end">');
-
-            this.call_plugins();
-
+            $('#progress').detach();
             return this;
         },
 
@@ -518,7 +465,7 @@ CATS.View = Classify({
         view_state.bind("change", function () {
             router.navigate(router.generate_url());
             console.log("load");
-            Pace.restart();
+            if(!$('#progress').length) $("body").prepend("<div id='progress'><img src='app/templates/img/loading.gif' /></div>");
         });
 
         var view = new self.View_logic($.extend({

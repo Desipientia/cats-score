@@ -2,21 +2,15 @@ requirejs.config({
     baseUrl: 'app/',
     paths: {
         jquery: '../vendors/jquery.min',
+        jqueryui: '../vendors/jquery-ui.min',
         jqpagination: '../vendors/jquery.jqpagination.min',
-        jqresize: '../vendors/jquery.ba-resize.min',
         underscore: '../vendors/underscore.min',
         backbone: '../vendors/backbone.min',
         classify: '../vendors/classify.min',
         dateformat: '../vendors/date.format',
-        jqflot: '../vendors/jquery.flot.min',
-        jqflot_axislabels: '../vendors/jquery.flot.axislabels',
-        jqflot_pie: '../vendors/jquery.flot.pie.min',
-        jqflot_resize: '../vendors/jquery.flot.resize.min',
-        bootstrap: '../vendors/bootstrap.min',
-        bootstrap_select: '../vendors/bootstrap-select.min',
-        bootstrap_slider: '../vendors/bootstrap-slider.min',
-        bootstrap_colorpicker: '../vendors/bootstrap-colorpicker.min',
-        pace: '../vendors/pace.min',
+        jqflot: '../vendors/jquery.flot',
+        jqflotaddon: '../vendors/jquery.flot.axislabels',
+        jqflotpie: '../vendors/jquery.flot.pie'
     },
     shim: {
         underscore: {
@@ -26,25 +20,16 @@ requirejs.config({
             deps: ['underscore', 'jquery'],
             exports: 'backbone'
         },
-        bootstrap: {
-            deps: ['jquery'],
-        },
         waitSeconds: 15
     }
 });
-require(['underscore', 'jquery', 'bootstrap'], function () {
-    require(['pace', 'backbone', 'classify', 'dateformat', 'jqresize', 'jqflot', 'jqpagination', 'CATS', 'bootstrap_select', 'bootstrap_slider'], function (pace) {
-        pace.start({
-            restartOnPushState: false,
-            elements: { selectors: ['#progress-end'] }
-        });
+require(['underscore', 'jquery', 'jqueryui'], function () {
+    require(['backbone', 'classify', 'dateformat', 'jqflot', 'jqpagination', 'CATS'], function () {
         require([
             'adapters/cats',
             'adapters/cats_xml_hist',
             'adapters/cats_rank_table',
             'adapters/ifmo',
-            'adapters/ifmo_xml',
-            'adapters/ifmo_school',
             'adapters/codeforces',
             'adapters/myicpc',
             'adapters/aizu',
@@ -54,10 +39,8 @@ require(['underscore', 'jquery', 'bootstrap'], function () {
             'adapters/default',
             'rules/base',
             'controller',
-            'jqflot_axislabels',
-            'jqflot_pie',
-            'jqflot_resize',
-            'bootstrap_colorpicker'
+            'jqflotaddon',
+            'jqflotpie'
         ], function () {
             require(['models/entity'], function () {
                 require(['models/event'], function () {
@@ -77,6 +60,7 @@ require(['underscore', 'jquery', 'bootstrap'], function () {
                         'models/user',
                         'rules/acm',
                         'rules/school',
+                        'adapters/ifmo_xml',
                         'view',
                         'utils',
                         'extentions',
@@ -148,3 +132,5 @@ require(['underscore', 'jquery', 'bootstrap'], function () {
         });
     });
 });
+
+

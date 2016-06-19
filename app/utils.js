@@ -41,11 +41,12 @@ CATS.Utils = Classify({
             crossDomain: true,
             dataType: type,
         }).done(function(data) {
-            console.log('success ' + url);
+            console.log("success " + url);
             callback(data);
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            console.log('error ' + url + '\n' + textStatus + ': ' + errorThrown);
-        });
+        })
+            .fail(function(a, b, c) {
+                console.log("error " + a + b + c);
+            });
     },
 
     cors_get_html: function(url, callback) {
@@ -78,10 +79,11 @@ CATS.Utils = Classify({
             url: url,
             dataType: 'json'
         }).done(function(data) {
-            console.log('success ' + url);
+            console.log("success " + url);
             callback(data);
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            console.log('error ' + url + '\n' + textStatus + ': ' + errorThrown);
+        })
+        .fail(function(a, b, c) {
+            console.log("error " + a + b + c);
         });
     },
 });
